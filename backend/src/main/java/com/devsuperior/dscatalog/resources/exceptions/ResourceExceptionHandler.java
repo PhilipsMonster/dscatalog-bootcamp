@@ -4,6 +4,8 @@ import java.time.Instant;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.devsuperior.dscatalog.services.exceptions.DataBaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 
@@ -55,6 +57,42 @@ public class ResourceExceptionHandler {
             error.addError(f.getField(), f.getDefaultMessage());
         }
 
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(AmazonServiceException.class)
+    public ResponseEntity<StandartError> amazonService(AmazonServiceException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandartError error = new StandartError();
+        error.setTimestamp(Instant.now());
+        error.setStatus(status.value());
+        error.setError("AWS Exception");
+        error.setMessage(e.getMessage());
+        error.setPath(request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(AmazonClientException.class)
+    public ResponseEntity<StandartError> amazonClient(AmazonClientException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandartError error = new StandartError();
+        error.setTimestamp(Instant.now());
+        error.setStatus(status.value());
+        error.setError("AWS Exception");
+        error.setMessage(e.getMessage());
+        error.setPath(request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+    
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<StandartError> illegalArgument(IllegalArgumentException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandartError error = new StandartError();
+        error.setTimestamp(Instant.now());
+        error.setStatus(status.value());
+        error.setError("Bad request");
+        error.setMessage(e.getMessage());
+        error.setPath(request.getRequestURI());
         return ResponseEntity.status(status).body(error);
     }
 }
